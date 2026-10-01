@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "equipement")
 @Getter
@@ -20,4 +23,8 @@ public class Equipement {
 
     @Column(nullable = false, length = 100)
     private String libelle;
+
+    // Plusieurs équipements peuvent être associés à plusieurs véhicules
+    @ManyToMany(mappedBy = "equipements")
+    private List<Vehicule> vehicules = new ArrayList<>();
 }

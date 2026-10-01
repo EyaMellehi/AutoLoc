@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "client")
@@ -26,15 +28,22 @@ public class Client {
     @Column(nullable = false, length = 50)
     private String prenom;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = false, length = 100)
     private String email;
 
     @Column(nullable = false, length = 20)
     private String telephone;
 
-    @Column(nullable = false, unique = true, length = 30)
+    @Column(nullable = false, length = 50)
     private String numPermis;
 
-    @Column(nullable = false)
     private LocalDate dateInscription;
+
+    // Client 1 ---- * Reservation
+    @OneToMany(
+            mappedBy = "client",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Reservation> reservations = new ArrayList<>();
 }

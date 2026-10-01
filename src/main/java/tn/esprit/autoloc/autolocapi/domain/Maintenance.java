@@ -25,6 +25,11 @@ public class Maintenance {
 
     private LocalDate dateFin;
 
-    @Column(nullable = false, length = 500)
+    @Column(length = 255)
     private String description;
+
+    // Plusieurs maintenances concernent un véhicule
+    @ManyToOne
+    @JoinColumn(name = "vehicule_id")
+    private Vehicule vehicule;
 }
