@@ -33,6 +33,5 @@ public class Paiement {
 
     // Plusieurs paiements appartiennent à un contrat
     @ManyToOne
-    @JoinColumn(name = "contrat_id")
     private Contrat contrat;
 }

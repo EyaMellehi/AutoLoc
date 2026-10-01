@@ -30,6 +30,6 @@ public class Employe {
 
     // Plusieurs employés appartiennent à une agence
     @ManyToOne
-    @JoinColumn(name = "agence_id")
+
     private Agence agence;
 }

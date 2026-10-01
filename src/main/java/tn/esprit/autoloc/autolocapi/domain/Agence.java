@@ -30,17 +30,13 @@ public class Agence {
     private String telephone;
     // Agence 1 ---- * Employe
     @OneToMany(
-            mappedBy = "agence",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
+            mappedBy = "agence"
     )
     private List<Employe> employes = new ArrayList<>();
 
     // Agence 1 ---- * Vehicule
     @OneToMany(
-            mappedBy = "agence",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
+            mappedBy = "agence"
     )
     private List<Vehicule> vehicules = new ArrayList<>();
 

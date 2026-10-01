@@ -30,6 +30,5 @@ public class Maintenance {
 
     // Plusieurs maintenances concernent un véhicule
     @ManyToOne
-    @JoinColumn(name = "vehicule_id")
     private Vehicule vehicule;
 }

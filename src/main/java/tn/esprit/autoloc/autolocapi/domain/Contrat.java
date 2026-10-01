@@ -34,17 +34,12 @@ public class Contrat {
 
     // Contrat appartient à une réservation
     @OneToOne
-    @JoinColumn(
-            name = "reservation_id",
-            unique = true
-    )
+
     private Reservation reservation;
 
     // Contrat 1 ---- * Paiement
     @OneToMany(
-            mappedBy = "contrat",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
+            mappedBy = "contrat"
     )
     private List<Paiement> paiements = new ArrayList<>();
 }

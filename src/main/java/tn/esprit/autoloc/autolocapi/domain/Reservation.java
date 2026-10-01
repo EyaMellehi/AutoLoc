@@ -32,19 +32,15 @@ public class Reservation {
 
     // Plusieurs réservations peuvent concerner un véhicule
     @ManyToOne
-    @JoinColumn(name = "vehicule_id")
     private Vehicule vehicule;
 
     // Plusieurs réservations peuvent appartenir à un client
     @ManyToOne
-    @JoinColumn(name = "client_id")
     private Client client;
 
     // Reservation 1 ---- 1 Contrat
     @OneToOne(
-            mappedBy = "reservation",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
+            mappedBy = "reservation"
     )
     private Contrat contrat;
 }

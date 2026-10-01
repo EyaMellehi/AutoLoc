@@ -44,36 +44,21 @@ public class Vehicule {
 
     // Plusieurs véhicules appartiennent à une agence
     @ManyToOne
-    @JoinColumn(name = "agence_id")
     private Agence agence;
 
     // Vehicule 1 ---- * Maintenance
     @OneToMany(
-            mappedBy = "vehicule",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
+            mappedBy = "vehicule"
     )
     private List<Maintenance> maintenances = new ArrayList<>();
 
     // Vehicule 1 ---- * Reservation
     @OneToMany(
-            mappedBy = "vehicule",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
+            mappedBy = "vehicule"
     )
     private List<Reservation> reservations = new ArrayList<>();
 
     // Vehicule * ---- * Equipement
-    @ManyToMany(
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-            }
-    )
-    @JoinTable(
-            name = "vehicule_equipement",
-            joinColumns = @JoinColumn(name = "vehicule_id"),
-            inverseJoinColumns = @JoinColumn(name = "equipement_id")
-    )
+    @ManyToMany
     private List<Equipement> equipements = new ArrayList<>();
 }

@@ -41,9 +41,7 @@ public class Client {
 
     // Client 1 ---- * Reservation
     @OneToMany(
-            mappedBy = "client",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
+            mappedBy = "client"
     )
     private List<Reservation> reservations = new ArrayList<>();
 }
