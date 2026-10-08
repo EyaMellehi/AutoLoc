@@ -8,7 +8,6 @@ import jakarta.persistence.OneToMany;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.math.BigDecimal;
 @Entity
 @Table(name = "agence")
 @Getter
@@ -35,9 +34,7 @@ public class Agence {
     private List<Employe> employes = new ArrayList<>();
 
     // Agence 1 ---- * Vehicule
-    @OneToMany(
-            mappedBy = "agence"
-    )
+    @OneToMany(mappedBy = "agence")
     private List<Vehicule> vehicules = new ArrayList<>();
 
 

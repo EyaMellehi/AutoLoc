@@ -46,11 +46,7 @@ public class Vehicule {
     @ManyToOne
     private Agence agence;
 
-    // Vehicule 1 ---- * Maintenance
-    @OneToMany(
-            mappedBy = "vehicule"
-    )
-    private List<Maintenance> maintenances = new ArrayList<>();
+
 
     // Vehicule 1 ---- * Reservation
     @OneToMany(
