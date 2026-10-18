@@ -1,42 +1,28 @@
 package tn.esprit.autoloc.autolocapi.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tn.esprit.autoloc.autolocapi.domain.Paiement;
+import tn.esprit.autoloc.autolocapi.exception.ResourceNotFoundException;
 import tn.esprit.autoloc.autolocapi.repository.IPaiementRepository;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class PaiementService implements IPaiementService {
 
     private final IPaiementRepository paiementRepository;
 
-    public PaiementService(IPaiementRepository paiementRepository) {
-        this.paiementRepository = paiementRepository;
+    @Override
+    public Paiement findById(Long id) {
+        return paiementRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Paiement", id));
     }
 
     @Override
-    public Paiement addPaiement(Paiement paiement) {
-        return paiementRepository.save(paiement);
-    }
-
-    @Override
-    public List<Paiement> getAllPaiements() {
+    public List<Paiement> findAll() {
         return paiementRepository.findAll();
-    }
-
-    @Override
-    public Paiement getPaiementById(Long id) {
-        return paiementRepository.findById(id).orElse(null);
-    }
-
-    @Override
-    public Paiement updatePaiement(Paiement paiement) {
-        return paiementRepository.save(paiement);
-    }
-
-    @Override
-    public void deletePaiement(Long id) {
-        paiementRepository.deleteById(id);
     }
 }
