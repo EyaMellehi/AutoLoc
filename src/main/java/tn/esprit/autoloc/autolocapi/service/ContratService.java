@@ -3,8 +3,13 @@ package tn.esprit.autoloc.autolocapi.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tn.esprit.autoloc.autolocapi.domain.Contrat;
+import tn.esprit.autoloc.autolocapi.domain.Paiement;
+import tn.esprit.autoloc.autolocapi.domain.Reservation;
+import tn.esprit.autoloc.autolocapi.dto.ContratDTO;
 import tn.esprit.autoloc.autolocapi.exception.ResourceNotFoundException;
+import tn.esprit.autoloc.autolocapi.mapper.ContratMapper;
 import tn.esprit.autoloc.autolocapi.repository.IContratRepository;
+import tn.esprit.autoloc.autolocapi.repository.IReservationRepository;
 
 import java.util.List;
 
@@ -13,44 +18,85 @@ import java.util.List;
 public class ContratService implements IContratService {
 
     private final IContratRepository contratRepository;
+    private final IReservationRepository reservationRepository;
+    private final ContratMapper contratMapper;
 
     @Override
-    public Contrat create(Contrat contrat) {
+    public ContratDTO create(ContratDTO dto) {
 
-        if (contrat.getIdContrat() != null) {
+        if (dto.getIdContrat() != null) {
             throw new IllegalArgumentException(
-                    "Un nouveau contrat ne doit pas avoir d'identifiant");
+                    "L'identifiant doit être null lors de la création"
+            );
         }
 
-        verifierMontant(contrat);
+        Reservation reservation = reservationRepository
+                .findById(dto.getReservationId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Reservation",
+                                dto.getReservationId()
+                        )
+                );
 
-        return contratRepository.save(contrat);
+        Contrat contrat = contratMapper.toEntity(dto);
+
+        contrat.setReservation(reservation);
+
+        if (contrat.getPaiements() != null) {
+            for (Paiement paiement : contrat.getPaiements()) {
+                paiement.setContrat(contrat);
+            }
+        }
+
+        return contratMapper.toDto(
+                contratRepository.save(contrat)
+        );
     }
 
     @Override
-    public Contrat findById(Long id) {
-        return contratRepository.findById(id)
+    public ContratDTO findById(Long id) {
+
+        Contrat contrat = contratRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Contrat", id));
+
+        return contratMapper.toDto(contrat);
     }
 
     @Override
-    public List<Contrat> findAll() {
-        return contratRepository.findAll();
+    public List<ContratDTO> findAll() {
+
+        return contratRepository.findAll()
+                .stream()
+                .map(contratMapper::toDto)
+                .toList();
     }
 
     @Override
-    public Contrat update(Long id, Contrat contrat) {
+    public ContratDTO update(Long id, ContratDTO dto) {
 
-        Contrat existant = findById(id);
+        Contrat contrat = contratRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Contrat", id));
 
-        verifierMontant(contrat);
+        Reservation reservation = reservationRepository
+                .findById(dto.getReservationId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Reservation",
+                                dto.getReservationId()
+                        )
+                );
 
-        existant.setDateSignature(contrat.getDateSignature());
-        existant.setMontantTotal(contrat.getMontantTotal());
-        existant.setValide(contrat.isValide());
+        contrat.setDateSignature(dto.getDateSignature());
+        contrat.setMontantTotal(dto.getMontantTotal());
+        contrat.setValide(dto.isValide());
+        contrat.setReservation(reservation);
 
-        return contratRepository.save(existant);
+        return contratMapper.toDto(
+                contratRepository.save(contrat)
+        );
     }
 
     @Override
@@ -61,15 +107,5 @@ public class ContratService implements IContratService {
         }
 
         contratRepository.deleteById(id);
-    }
-
-    private void verifierMontant(Contrat contrat) {
-
-        if (contrat.getMontantTotal() != null
-                && contrat.getMontantTotal().signum() < 0) {
-
-            throw new IllegalArgumentException(
-                    "Le montant total ne peut pas être négatif");
-        }
     }
 }

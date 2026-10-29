@@ -3,71 +3,94 @@ package tn.esprit.autoloc.autolocapi.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tn.esprit.autoloc.autolocapi.domain.Equipement;
+import tn.esprit.autoloc.autolocapi.dto.EquipementDTO;
 import tn.esprit.autoloc.autolocapi.exception.ResourceNotFoundException;
+import tn.esprit.autoloc.autolocapi.mapper.EquipementMapper;
 import tn.esprit.autoloc.autolocapi.repository.IEquipementRepository;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class EquipementService implements IEquipementService {
+public class EquipementService
+        implements IEquipementService {
 
     private final IEquipementRepository equipementRepository;
+    private final EquipementMapper equipementMapper;
 
     @Override
-    public Equipement create(Equipement equipement) {
+    public EquipementDTO create(EquipementDTO dto) {
 
-        if (equipement.getIdEquipement() != null) {
+        if (dto.getIdEquipement() != null) {
             throw new IllegalArgumentException(
-                    "Un nouvel équipement ne doit pas avoir d'identifiant");
+                    "L'identifiant doit être null lors de la création"
+            );
         }
 
-        verifierLibelle(equipement);
+        Equipement equipement =
+                equipementMapper.toEntity(dto);
 
-        return equipementRepository.save(equipement);
+        return equipementMapper.toDto(
+                equipementRepository.save(equipement)
+        );
     }
 
     @Override
-    public Equipement findById(Long id) {
-        return equipementRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Equipement", id));
+    public EquipementDTO findById(Long id) {
+
+        Equipement equipement =
+                equipementRepository.findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Equipement",
+                                        id
+                                )
+                        );
+
+        return equipementMapper.toDto(equipement);
     }
 
     @Override
-    public List<Equipement> findAll() {
-        return equipementRepository.findAll();
+    public List<EquipementDTO> findAll() {
+
+        return equipementRepository.findAll()
+                .stream()
+                .map(equipementMapper::toDto)
+                .toList();
     }
 
     @Override
-    public Equipement update(Long id, Equipement equipement) {
+    public EquipementDTO update(
+            Long id,
+            EquipementDTO dto
+    ) {
 
-        Equipement existant = findById(id);
+        Equipement equipement =
+                equipementRepository.findById(id)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Equipement",
+                                        id
+                                )
+                        );
 
-        verifierLibelle(equipement);
+        equipement.setLibelle(dto.getLibelle());
 
-        existant.setLibelle(equipement.getLibelle());
-
-        return equipementRepository.save(existant);
+        return equipementMapper.toDto(
+                equipementRepository.save(equipement)
+        );
     }
 
     @Override
     public void deleteById(Long id) {
 
         if (!equipementRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Equipement", id);
+            throw new ResourceNotFoundException(
+                    "Equipement",
+                    id
+            );
         }
 
         equipementRepository.deleteById(id);
-    }
-
-    private void verifierLibelle(Equipement equipement) {
-
-        if (equipement.getLibelle() == null
-                || equipement.getLibelle().isBlank()) {
-
-            throw new IllegalArgumentException(
-                    "Le libellé de l'équipement est obligatoire");
-        }
     }
 }

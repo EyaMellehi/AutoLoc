@@ -2,8 +2,12 @@ package tn.esprit.autoloc.autolocapi.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import tn.esprit.autoloc.autolocapi.domain.Agence;
 import tn.esprit.autoloc.autolocapi.domain.Employe;
+import tn.esprit.autoloc.autolocapi.dto.EmployeDTO;
 import tn.esprit.autoloc.autolocapi.exception.ResourceNotFoundException;
+import tn.esprit.autoloc.autolocapi.mapper.EmployeMapper;
+import tn.esprit.autoloc.autolocapi.repository.IAgenceRepository;
 import tn.esprit.autoloc.autolocapi.repository.IEmployeRepository;
 
 import java.util.List;
@@ -13,55 +17,78 @@ import java.util.List;
 public class EmployeService implements IEmployeService {
 
     private final IEmployeRepository employeRepository;
+    private final IAgenceRepository agenceRepository;
+    private final EmployeMapper employeMapper;
 
     @Override
-    public Employe create(Employe employe) {
+    public EmployeDTO create(EmployeDTO dto) {
 
-        if (employe.getIdEmploye() != null) {
+        if (dto.getIdEmploye() != null) {
             throw new IllegalArgumentException(
-                    "Un nouvel employé ne doit pas avoir d'identifiant");
+                    "L'identifiant doit être null lors de la création"
+            );
         }
 
-        if (employe.getNom() == null || employe.getNom().isBlank()) {
-            throw new IllegalArgumentException(
-                    "Le nom de l'employé est obligatoire");
-        }
+        Agence agence = agenceRepository
+                .findById(dto.getAgenceId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Agence",
+                                dto.getAgenceId()
+                        )
+                );
 
-        if (employe.getRole() == null) {
-            throw new IllegalArgumentException(
-                    "Le rôle de l'employé est obligatoire");
-        }
+        Employe employe = employeMapper.toEntity(dto);
+        employe.setAgence(agence);
 
-        return employeRepository.save(employe);
+        return employeMapper.toDto(
+                employeRepository.save(employe)
+        );
     }
 
     @Override
-    public Employe findById(Long id) {
-        return employeRepository.findById(id)
+    public EmployeDTO findById(Long id) {
+
+        Employe employe = employeRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Employe", id));
+
+        return employeMapper.toDto(employe);
     }
 
     @Override
-    public List<Employe> findAll() {
-        return employeRepository.findAll();
+    public List<EmployeDTO> findAll() {
+
+        return employeRepository.findAll()
+                .stream()
+                .map(employeMapper::toDto)
+                .toList();
     }
 
     @Override
-    public Employe update(Long id, Employe employe) {
+    public EmployeDTO update(Long id, EmployeDTO dto) {
 
-        Employe existant = findById(id);
+        Employe employe = employeRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Employe", id));
 
-        if (employe.getNom() == null || employe.getNom().isBlank()) {
-            throw new IllegalArgumentException(
-                    "Le nom de l'employé est obligatoire");
-        }
+        Agence agence = agenceRepository
+                .findById(dto.getAgenceId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Agence",
+                                dto.getAgenceId()
+                        )
+                );
 
-        existant.setNom(employe.getNom());
-        existant.setPrenom(employe.getPrenom());
-        existant.setRole(employe.getRole());
+        employe.setNom(dto.getNom());
+        employe.setPrenom(dto.getPrenom());
+        employe.setRole(dto.getRole());
+        employe.setAgence(agence);
 
-        return employeRepository.save(existant);
+        return employeMapper.toDto(
+                employeRepository.save(employe)
+        );
     }
 
     @Override
